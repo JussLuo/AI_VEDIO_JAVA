@@ -55,3 +55,18 @@ ALTER TABLE shots MODIFY COLUMN video_prompt TEXT NOT NULL COMMENT '视频生成
 ALTER TABLE shots MODIFY COLUMN duration_seconds INT NOT NULL COMMENT '镜头时长，单位秒';
 ALTER TABLE shots MODIFY COLUMN created_at VARCHAR(30) NOT NULL COMMENT '创建时间';
 ALTER TABLE shots MODIFY COLUMN updated_at VARCHAR(30) NOT NULL COMMENT '最后更新时间';
+
+CREATE TABLE IF NOT EXISTS assets (
+    id VARCHAR(36) PRIMARY KEY COMMENT '素材唯一标识',
+    project_id VARCHAR(36) NOT NULL COMMENT '所属项目标识',
+    shot_id VARCHAR(36) NULL COMMENT '关联分镜标识',
+    asset_type VARCHAR(32) NOT NULL COMMENT '素材类型',
+    name VARCHAR(255) NOT NULL COMMENT '素材名称',
+    file_path VARCHAR(1000) NOT NULL COMMENT '本地文件路径',
+    mime_type VARCHAR(128) NOT NULL COMMENT '文件媒体类型',
+    file_size BIGINT NOT NULL COMMENT '文件大小，单位字节',
+    created_at VARCHAR(30) NOT NULL COMMENT '创建时间',
+    updated_at VARCHAR(30) NOT NULL COMMENT '最后更新时间',
+    CONSTRAINT fk_assets_project FOREIGN KEY (project_id) REFERENCES projects(id),
+    CONSTRAINT fk_assets_shot FOREIGN KEY (shot_id) REFERENCES shots(id)
+) COMMENT='项目素材';
