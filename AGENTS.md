@@ -24,8 +24,10 @@ Java 版本 AI 漫剧制作工作台：React/Vite 前端与 Spring Boot 后端�
 ## 架构约束
 
 - 前端通过 HTTP REST API 调用后端，不得直接访问数据库、文件系统或 AI 密钥。
-- 后端使用 Spring Boot、SQLite 和 controller/service/repository/model 分层结构。
-- 数据库迁移放在 `src/main/resources/db/migration/`。
+- 后端使用 Spring Boot、MySQL 和 controller/service/service.impl/mapper/entity 分层结构，SQL 放在 `mapper/*.xml`。
+- 实体类统一放在 `entity` 包，必须添加中文 JavaDoc 和字段注释；使用 Lombok 生成访问器，禁止手写 getter/setter。Hutool 仅用于通用工具能力，不承担访问器生成。
+- 请求 DTO 放在 `dto` 包，所有 REST 控制器放在 `controller` 包；资源使用复数名词路径及标准 HTTP 状态码。
+- 当前基础建表脚本为 `src/main/resources/sql/schema.sql`，必须保持重复执行安全；后续结构变更采用版本化迁移。
 - AI 密钥只从环境变量读取，禁止写入源码、日志或提交记录。
 - FFmpeg 由后端调用，长时间任务使用后台任务队列。
 

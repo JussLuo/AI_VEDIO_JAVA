@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ai168.vedio.mapper.ProjectMapper">
+    <resultMap id="ProjectResultMap" type="com.ai168.vedio.entity.Project">
+        <id property="id" column="id"/><result property="name" column="name"/>
+        <result property="description" column="description"/><result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+    <insert id="insert">INSERT INTO projects (id, name, description, created_at, updated_at) VALUES (#{id}, #{name}, #{description}, #{createdAt}, #{updatedAt})</insert>
+    <select id="selectAll" resultMap="ProjectResultMap">SELECT id, name, description, created_at, updated_at FROM projects ORDER BY created_at DESC, id DESC</select>
+    <select id="selectById" resultMap="ProjectResultMap">SELECT id, name, description, created_at, updated_at FROM projects WHERE id = #{id}</select>
+</mapper>

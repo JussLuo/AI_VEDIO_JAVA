@@ -1,0 +1,7 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:vedio_test;MODE=MySQL;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+mybatis:
+  mapper-locations: classpath*:mapper/**/*.xml

@@ -4,6 +4,13 @@ spring:
   application:
     name: vedio-java
   datasource:
-    url: jdbc:sqlite:${DATABASE_PATH:./data/vedio.db}
+    url: ${DB_URL:jdbc:mysql://localhost:3306/vedio_java}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:}
+  sql:
+    init:
+      mode: always
+mybatis:
+  mapper-locations: classpath*:mapper/**/*.xml
 vedio:
   upload-dir: ${UPLOAD_DIR:./data/uploads}
