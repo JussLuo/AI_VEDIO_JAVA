@@ -35,4 +35,6 @@ Java 版本 AI 漫剧制作工作台：React/Vite 前端与 Spring Boot 后端�
 
 - 修改 Java 后端必须运行指定 Maven 的 `test`。
 - 按功能批次提交，Commit Message 使用中文。
+- `docs/` 和 `src/test/` 只保留在本地，不提交到 Git；每次暂存后检查 `git diff --cached --name-only`，发现这些路径必须取消暂存。
+- 方案仍须先保存到本地 `docs/`，测试仍须编写并运行；忽略规则不代表跳过文档和验证。
 - 未经用户确认，不得执行 `git commit` 或 `git push`。
