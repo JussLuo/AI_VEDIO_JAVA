@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ai168.vedio.mapper.ShotMapper">
+    <resultMap id="ShotResultMap" type="com.ai168.vedio.entity.Shot">
+        <id property="id" column="id"/>
+        <result property="scriptId" column="script_id"/>
+        <result property="shotNumber" column="shot_number"/>
+        <result property="visualDescription" column="visual_description"/>
+        <result property="videoPrompt" column="video_prompt"/>
+        <result property="durationSeconds" column="duration_seconds"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+    <insert id="insert">
+        INSERT INTO shots (id, script_id, shot_number, visual_description, video_prompt,
+                           duration_seconds, created_at, updated_at)
+        VALUES (#{id}, #{scriptId}, #{shotNumber}, #{visualDescription}, #{videoPrompt},
+                #{durationSeconds}, #{createdAt}, #{updatedAt})
+    </insert>
+    <select id="selectByScriptId" resultMap="ShotResultMap">
+        SELECT id, script_id, shot_number, visual_description, video_prompt,
+               duration_seconds, created_at, updated_at
+        FROM shots WHERE script_id = #{scriptId} ORDER BY shot_number, id
+    </select>
+    <select id="selectById" resultMap="ShotResultMap">
+        SELECT id, script_id, shot_number, visual_description, video_prompt,
+               duration_seconds, created_at, updated_at
+        FROM shots WHERE id = #{id}
+    </select>
+    <select id="countByScriptAndNumber" resultType="int">
+        SELECT COUNT(*) FROM shots
+        WHERE script_id = #{scriptId} AND shot_number = #{shotNumber}
+        <if test="excludedId != null">AND id != #{excludedId}</if>
+    </select>
+    <update id="update">
+        UPDATE shots
+        SET shot_number = #{shotNumber}, visual_description = #{visualDescription},
+            video_prompt = #{videoPrompt}, duration_seconds = #{durationSeconds},
+            updated_at = #{updatedAt}
+        WHERE id = #{id}
+    </update>
+    <delete id="deleteById">
+        DELETE FROM shots WHERE id = #{id}
+    </delete>
+</mapper>

@@ -28,6 +28,7 @@ Java 版本 AI 漫剧制作工作台：React/Vite 前端与 Spring Boot 后端�
 - 实体类统一放在 `entity` 包，必须添加中文 JavaDoc 和字段注释；使用 Lombok 生成访问器，禁止手写 getter/setter。Hutool 仅用于通用工具能力，不承担访问器生成。
 - 请求 DTO 放在 `dto` 包，所有 REST 控制器放在 `controller` 包；资源使用复数名词路径及标准 HTTP 状态码。
 - 当前基础建表脚本为 `src/main/resources/sql/schema.sql`，必须保持重复执行安全；后续结构变更采用版本化迁移。
+- 新建或修改数据库表时，表和每个字段必须写中文数据库注释；已有表新增注释时要考虑存量数据与重复执行。
 - AI 密钥只从环境变量读取，禁止写入源码、日志或提交记录。
 - FFmpeg 由后端调用，长时间任务使用后台任务队列。
 
