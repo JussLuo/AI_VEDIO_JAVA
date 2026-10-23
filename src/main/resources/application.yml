@@ -1,0 +1,9 @@
+server:
+  port: ${SERVER_PORT:8080}
+spring:
+  application:
+    name: vedio-java
+  datasource:
+    url: jdbc:sqlite:${DATABASE_PATH:./data/vedio.db}
+vedio:
+  upload-dir: ${UPLOAD_DIR:./data/uploads}
