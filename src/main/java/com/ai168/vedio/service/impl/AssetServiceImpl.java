@@ -9,12 +9,14 @@ import com.ai168.vedio.mapper.ProjectMapper;
 import com.ai168.vedio.mapper.ScriptMapper;
 import com.ai168.vedio.mapper.ShotMapper;
 import com.ai168.vedio.service.AssetService;
+import com.ai168.vedio.service.AssetFileStorage;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class AssetServiceImpl implements AssetService {
@@ -22,21 +24,25 @@ public class AssetServiceImpl implements AssetService {
     private final ProjectMapper projectMapper;
     private final ShotMapper shotMapper;
     private final ScriptMapper scriptMapper;
+    private final AssetFileStorage fileStorage;
 
     public AssetServiceImpl(
             AssetMapper assetMapper,
             ProjectMapper projectMapper,
             ShotMapper shotMapper,
-            ScriptMapper scriptMapper) {
+            ScriptMapper scriptMapper,
+            AssetFileStorage fileStorage) {
         this.assetMapper = assetMapper;
         this.projectMapper = projectMapper;
         this.shotMapper = shotMapper;
         this.scriptMapper = scriptMapper;
+        this.fileStorage = fileStorage;
     }
 
     @Override
     public Asset createAsset(String projectId, SaveAssetRequest request) {
         requireProject(projectId);
+        validateMetadataPath(request.filePath(), null);
         String shotId = normalizeShotId(request.shotId());
         validateShot(projectId, shotId);
         Instant now = Instant.now();
@@ -73,6 +79,12 @@ public class AssetServiceImpl implements AssetService {
             return Optional.empty();
         }
         Asset asset = existing.get();
+        validateMetadataPath(request.filePath(), asset);
+        if (fileStorage.isManaged(asset.getProjectId(), asset.getFilePath())
+                && (!request.mimeType().equals(asset.getMimeType())
+                || !request.fileSize().equals(asset.getFileSize()))) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "已上传文件的类型和大小不可修改");
+        }
         String shotId = normalizeShotId(request.shotId());
         validateShot(asset.getProjectId(), shotId);
         asset.setShotId(shotId);
@@ -88,7 +100,55 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public boolean deleteAsset(String id) {
-        return assetMapper.deleteById(id) > 0;
+        Optional<Asset> existing = assetMapper.selectById(id);
+        if (existing.isEmpty()) {
+            return false;
+        }
+        Asset asset = existing.get();
+        if (assetMapper.deleteById(id) == 0) {
+            return false;
+        }
+        if (fileStorage.isManaged(asset.getProjectId(), asset.getFilePath())) {
+            fileStorage.delete(asset.getProjectId(), asset.getFilePath());
+        }
+        return true;
+    }
+
+    @Override
+    public Asset uploadAsset(String projectId, String shotId, String assetType, String name, MultipartFile file) {
+        requireProject(projectId);
+        String normalizedShotId = normalizeShotId(shotId);
+        validateShot(projectId, normalizedShotId);
+        if (assetType == null || assetType.isBlank() || name == null || name.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "素材类型和名称不能为空");
+        }
+        AssetFileStorage.StoredFile storedFile = fileStorage.save(projectId, file);
+        Instant now = Instant.now();
+        Asset asset = new Asset(
+                IdUtil.fastSimpleUUID(),
+                projectId,
+                normalizedShotId,
+                assetType.trim(),
+                name.trim(),
+                storedFile.relativePath(),
+                storedFile.mimeType(),
+                storedFile.size(),
+                now,
+                now);
+        try {
+            assetMapper.insert(asset);
+        } catch (RuntimeException exception) {
+            fileStorage.delete(projectId, storedFile.relativePath());
+            throw exception;
+        }
+        return asset;
+    }
+
+    @Override
+    public byte[] readAssetContent(String id) {
+        Asset asset = assetMapper.selectById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "素材不存在"));
+        return fileStorage.read(asset.getProjectId(), asset.getFilePath());
     }
 
     private void requireProject(String projectId) {
@@ -99,6 +159,21 @@ public class AssetServiceImpl implements AssetService {
 
     private String normalizeShotId(String shotId) {
         return shotId == null || shotId.isBlank() ? null : shotId.trim();
+    }
+
+    private void validateMetadataPath(String filePath, Asset existing) {
+        String normalizedPath = filePath.trim().replace('\\', '/');
+        if (existing != null
+                && fileStorage.isManaged(existing.getProjectId(), existing.getFilePath())
+                && normalizedPath.equals(existing.getFilePath())) {
+            return;
+        }
+        if (existing != null && fileStorage.isManaged(existing.getProjectId(), existing.getFilePath())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "已上传文件的路径不可修改");
+        }
+        if (normalizedPath.startsWith("projects/")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "上传目录路径由服务端管理");
+        }
     }
 
     private void validateShot(String projectId, String shotId) {
