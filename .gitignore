@@ -5,3 +5,5 @@ data/
 docs/
 src/test/
 config/ai-local.yml
+config/application-local.yml
+src/main/resources/application-local.yml

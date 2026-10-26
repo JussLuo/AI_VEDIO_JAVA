@@ -2,7 +2,7 @@ server:
   port: ${SERVER_PORT:8080}
 spring:
   config:
-    import: optional:file:./config/ai-local.yml
+    import: optional:file:./config/application-local.yml
   application:
     name: vedio-java
   datasource:
@@ -12,7 +12,7 @@ spring:
   sql:
     init:
       mode: always
-      schema-locations: classpath:sql/schema.sql
+      schema-locations: classpath:sql/schema.sql,classpath:sql/migrations/V2__video_tasks.sql
   servlet:
     multipart:
       max-file-size: 10MB
