@@ -1,7 +1,9 @@
 package com.ai168.vedio.controller;
 
 import com.ai168.vedio.dto.SaveShotRequest;
+import com.ai168.vedio.dto.ShotDraft;
 import com.ai168.vedio.entity.Shot;
+import com.ai168.vedio.service.ShotDraftService;
 import com.ai168.vedio.service.ShotService;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -18,9 +20,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ShotController {
     private final ShotService shotService;
+    private final ShotDraftService shotDraftService;
 
-    public ShotController(ShotService shotService) {
+    public ShotController(ShotService shotService, ShotDraftService shotDraftService) {
         this.shotService = shotService;
+        this.shotDraftService = shotDraftService;
+    }
+
+    @PostMapping("/api/scripts/{scriptId}/shot-drafts")
+    public List<ShotDraft> generateShotDrafts(@PathVariable String scriptId) {
+        return shotDraftService.generateDrafts(scriptId);
     }
 
     @PostMapping("/api/scripts/{scriptId}/shots")

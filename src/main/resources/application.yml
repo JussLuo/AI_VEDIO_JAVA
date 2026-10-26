@@ -1,6 +1,8 @@
 server:
   port: ${SERVER_PORT:8080}
 spring:
+  config:
+    import: optional:file:./config/ai-local.yml
   application:
     name: vedio-java
   datasource:

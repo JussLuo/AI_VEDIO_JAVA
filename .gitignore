@@ -4,3 +4,4 @@ data/
 *.iml
 docs/
 src/test/
+config/ai-local.yml
