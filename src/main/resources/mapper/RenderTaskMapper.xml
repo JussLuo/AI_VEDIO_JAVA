@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ai168.vedio.mapper.RenderTaskMapper">
+    <resultMap id="RenderTaskResultMap" type="com.ai168.vedio.entity.RenderTask">
+        <id property="id" column="id"/>
+        <result property="scriptId" column="script_id"/>
+        <result property="status" column="status"/>
+        <result property="videoTaskIds" column="video_task_ids"/>
+        <result property="outputPath" column="output_path"/>
+        <result property="errorMessage" column="error_message"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+    <insert id="insert">
+        INSERT INTO render_tasks (id, script_id, status, video_task_ids,
+                                  output_path, error_message, created_at, updated_at)
+        VALUES (#{id}, #{scriptId}, #{status}, #{videoTaskIds},
+                #{outputPath}, #{errorMessage}, #{createdAt}, #{updatedAt})
+    </insert>
+    <update id="update">
+        UPDATE render_tasks
+        SET status = #{status}, output_path = #{outputPath},
+            error_message = #{errorMessage}, updated_at = #{updatedAt}
+        WHERE id = #{id}
+    </update>
+    <select id="selectById" resultMap="RenderTaskResultMap">
+        SELECT * FROM render_tasks WHERE id = #{id}
+    </select>
+    <select id="selectByScriptId" resultMap="RenderTaskResultMap">
+        SELECT * FROM render_tasks WHERE script_id = #{scriptId}
+        ORDER BY created_at DESC, id DESC
+    </select>
+    <select id="selectPending" resultMap="RenderTaskResultMap">
+        SELECT * FROM render_tasks WHERE status IN ('QUEUED', 'RENDERING')
+        ORDER BY created_at, id LIMIT 5
+    </select>
+</mapper>

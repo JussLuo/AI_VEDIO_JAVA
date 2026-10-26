@@ -86,13 +86,21 @@ public class VideoFileStorage {
     }
 
     public byte[] read(String fileName) {
-        if (fileName == null || !fileName.matches("[a-fA-F0-9]{32}\\.mp4")) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "视频不存在");
-        }
         try {
-            return Files.readAllBytes(root.resolve(fileName));
+            return Files.readAllBytes(pathFor(fileName));
         } catch (IOException exception) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "视频不存在");
         }
+    }
+
+    public Path pathFor(String fileName) {
+        if (fileName == null || !fileName.matches("[a-fA-F0-9]{32}\\.mp4")) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "视频不存在");
+        }
+        Path path = root.resolve(fileName);
+        if (!Files.isRegularFile(path)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "视频不存在");
+        }
+        return path;
     }
 }
